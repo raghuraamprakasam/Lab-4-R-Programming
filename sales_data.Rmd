@@ -1,0 +1,84 @@
+---
+title: "Sales prediction using variables"
+author: "Rgahuraam P (2648130)"
+date: "`r Sys.Date()`"
+output: word_document
+---
+## 1.INTRODUCTION
+
+Multiple Linear Regression is a statistical technique used to examine the relationship between a dependent variable and two or more independent variables. It is useful for understanding how several factors simultaneously influence an outcome and for developing models that can be used for prediction. In this analysis, **Sales** is considered the dependent variable, while **Advertising Costs, Store Size, Percentage of Employee Retention, Customer Satisfaction Score, and Promotion** are considered the independent variables.
+
+The objective of this study is to develop an appropriate multiple linear regression model for predicting sales across 41 stores. The analysis aims to identify the variables that contribute significantly to sales and to determine the best combination of predictors for the regression model.
+
+To select the most suitable set of explanatory variables, three variable-selection procedures—**Forward Selection, Backward Elimination, and Stepwise Selection**—are applied. The models obtained from these procedures are compared using appropriate statistical criteria to determine the best-fitting model. The final model can provide useful insights into the factors affecting store sales and can support better decision-making regarding advertising, store operations, employee retention, customer satisfaction, and promotional activities.
+
+## 2.ANALYSIS
+
+```{r}
+library(readxl)
+data <- read_xlsx("C:/Users/raghu/OneDrive/Desktop/STUDIES/Guithub + Practical college/practicals/R programming/lab_4/store_sales_data.xlsx")
+head(data)
+```
+```{r}
+# dimension 
+dim(data)
+```
+```{r}
+# structure of data
+str(data)
+```
+## 2.1 - CORRELATION
+```{r}
+library(Hmisc)
+data_corr <- data[,c("Store","Advertising Costs","Size (Sq. Ft)","% Employee Retention","Customer Satisfaction","Promotion","Sales")]
+corr_result <- rcorr(as.matrix(data_corr))
+# correlation coefficients
+corr_result$r
+# p-values
+corr_result$P
+```
+```{r}
+## correlation plot
+pairs(data_corr[1:7])
+```
+
+## 2.2 - FORWARD SELECTION
+```{r}
+fitstart <- lm(Sales~1,data = data)
+fitstart
+full <- lm(Sales ~.,data = data)
+fwd <- step(fitstart,
+            scope = formula(full),
+            direction = "forward")
+summary(fwd)
+```
+## 2.3 - BACKWARD ELIMINATION
+```{r}
+back <- step(full,
+             direction = "backward")
+summary(back)
+```
+## 2.4 - STEP WISE 
+```{r}
+step <- step(full,
+             direction = "both")
+summary(step)
+```
+## 3.CONCLUSION
+The Adjusted \(R^2\) values obtained from the three variable-selection procedures are:
+| Model Selection Method | Adjusted \(R^2\) |
+| ---------------------- | ---------------: |
+| Forward Selection      |        **0.716** |
+| Backward Elimination   |        **0.713** |
+| Stepwise Selection     |        **0.713** |
+
+The Forward Selection model has the highest adjusted \(R^2\) value of 0.716. This indicates that approximately 71.6% of the variation in Sales is explained by the predictors included in the final forward-selection model, after adjusting for the number of predictors used in the model.
+
+The Backward Elimination and Stepwise Selection models have an adjusted \(R^2\) of 0.713, indicating that they explain approximately 71.3% of the variation in Sales, after accounting for the number of predictors.
+
+Since the adjusted \(R^2\) of the Forward Selection model (0.716) is slightly higher than those of the Backward and Stepwise models (0.713), the Forward Selection model provides the best fit among the three models based on adjusted \(R^2\).
+Therefor the best model is 
+Sales ~ `Size (Sq. Ft)` + Promotion + `Customer Satisfaction` + 
+    `Advertising Costs` + `% Employee Retention`.
+    
+
